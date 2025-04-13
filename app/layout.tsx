@@ -22,12 +22,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <div className="flex min-h-screen w-full">
           
-          {children}
+         {children} 
         </div>
       </body>
     </html>
   )
 }
 
-
-import './globals.css'

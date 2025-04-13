@@ -7,8 +7,7 @@ import { LearningBuddy } from "./learning-buddy"
 
 export function Dashboard() {
   return (
-    <div>
-      
+    <div> 
       <div className="flex flex-col md:flex-row min-h-screen">
         <div className="flex-1 p-6 bg-white">
           <PointsDisplay points={600} />
