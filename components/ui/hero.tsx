@@ -10,7 +10,7 @@ export default function Hero() {
 
     <div className="flex-col"> 
 
-         <div className="font-bold text-green-500 text-xl"> StudyHubby </div>
+         <div className="font-bold text-emerald-500 text-xl"> StudyHubby </div>
 
          <div className="underline-offset-2 text-white"> Reform your studying today with a study soul-mate by your side! </div>
     
