@@ -1,3 +1,4 @@
 {
-  "/landing/page": "app/landing/page.js"
+  "/landing/page": "app/landing/page.js",
+  "/dashboard/page": "app/dashboard/page.js"
 }
