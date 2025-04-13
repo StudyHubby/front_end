@@ -5,16 +5,17 @@ import { FileText, ImageIcon, Send } from "lucide-react"
 
 export function ChatBot() {
   const [message, setMessage] = useState("")
-  const [files, setFiles] = useState<{ name: string; type: string }[]>([])
   const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([
     {
       text: "Hi there! I'm your learning assistant. Upload your notes or ask me anything!",
       isUser: false,
     },
   ])
+
+  const pdfInputRef = useRef<HTMLInputElement | null>(null)
+  const imageInputRef = useRef<HTMLInputElement | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
- 
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "40px"
@@ -22,24 +23,26 @@ export function ChatBot() {
     }
   }, [message])
 
- 
   const handleSendMessage = async () => {
     if (message.trim()) {
       const userMessage = { text: message, isUser: true }
       setMessages((prev) => [...prev, userMessage])
 
       try {
-        const res = await fetch("http://localhost:8000/chat", {
+        const res = await fetch("http://localhost:8000/process/", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message }),
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            user_input: message,
+            user_option: "2", // Example option, adjust based on your backend logic
+          }),
         })
 
         const data = await res.json()
 
         setMessages((prev) => [
           ...prev,
-          { text: data.reply || "No response from bot.", isUser: false },
+          { text: data.response || "No response from bot.", isUser: false },
         ])
       } catch (error) {
         setMessages((prev) => [
@@ -55,19 +58,40 @@ export function ChatBot() {
     }
   }
 
-  const handleFileUpload = (type: "pdf" | "image") => {
-    const fileName = type === "pdf" ? "lecture_notes.pdf" : "handwritten_notes.jpg"
-    setFiles([...files, { name: fileName, type }])
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: "pdf" | "image") => {
+    const file = event.target.files?.[0]
+    if (!file) return
 
-    setTimeout(() => {
+    const formData = new FormData()
+    formData.append("file", file)
+    formData.append("name", file.name)
+
+    try {
+      const res = await fetch("http://localhost:8000/upload/", {
+        method: "POST",
+        body: formData,
+      })
+
+      if (res.ok) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            text: `✅ Uploaded your ${type === "pdf" ? "PDF" : "image"} successfully. You can now ask questions!`,
+            isUser: false,
+          },
+        ])
+      } else {
+        throw new Error("Upload failed")
+      }
+    } catch (err) {
       setMessages((prev) => [
         ...prev,
         {
-          text: `I've analyzed your ${type === "pdf" ? "PDF" : "handwritten notes"}. What would you like to know about it?`,
+          text: "❌ There was an error uploading your file. Please try again.",
           isUser: false,
         },
       ])
-    }, 1500)
+    }
   }
 
   return (
@@ -103,20 +127,37 @@ export function ChatBot() {
       <div className="p-6 border-t border-slate-700 bg-slate-800">
         <div className="flex gap-4 mb-6 justify-center">
           <button
-            onClick={() => handleFileUpload("pdf")}
+            onClick={() => pdfInputRef.current?.click()}
             className="flex items-center gap-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 rounded-full px-6 py-3 text-white shadow-md transition-all duration-200"
           >
             <FileText className="h-5 w-5 text-indigo-300" />
             <span className="font-medium">Upload PDF</span>
           </button>
           <button
-            onClick={() => handleFileUpload("image")}
+            onClick={() => imageInputRef.current?.click()}
             className="flex items-center gap-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 rounded-full px-6 py-3 text-white shadow-md transition-all duration-200"
           >
             <ImageIcon className="h-5 w-5 text-indigo-300" />
             <span className="font-medium">Upload Image</span>
           </button>
+
+          {/* Hidden file inputs */}
+          <input
+            ref={pdfInputRef}
+            type="file"
+            accept="application/pdf"
+            onChange={(e) => handleFileUpload(e, "pdf")}
+            className="hidden"
+          />
+          <input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleFileUpload(e, "image")}
+            className="hidden"
+          />
         </div>
+
         <div className="flex gap-2 items-center">
           <input
             type="text"
@@ -142,3 +183,4 @@ export function ChatBot() {
     </div>
   )
 }
+
