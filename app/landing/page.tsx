@@ -11,9 +11,9 @@ export default function Landing() {
     <Navbar /> 
     </div>
 
-    {/* <div className="w-1/3 mx-auto">
+    <div className="w-1/3 mx-auto">
         <Hero />
-    </div> */}
+    </div>
 
     <div className="absolute w-full bottom-0"> 
         <Footer />
