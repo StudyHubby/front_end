@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/sidebar"
 
 export default function DashboardPage() {
   return (
-    <div className= "mx-auto">
+    <div className="w-full h-screen ">
       <Header />
       
       <div className="flex-1 p-6">

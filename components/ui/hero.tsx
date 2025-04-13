@@ -7,7 +7,7 @@ export default function Hero() {
       <div className="bg-gray-900 text-white rounded-xl shadow-lg px-10 py-12 max-w-2xl w-full space-y-10">
         <div className="text-3xl font-bold text-emerald-500">Your Learning... Amplified!</div>
 
-        <div className="underline underline-offset-1 decoration-wavy">
+        <div className="underline underline-offset-2 decoration-wavy">
           Reform your studying today with our study soul-mate by your side!
         </div>
 
