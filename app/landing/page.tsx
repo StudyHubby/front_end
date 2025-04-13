@@ -5,13 +5,13 @@ import { Navbar } from "@/components/ui/Navbar";
 
 export default function Landing() {
  return(
-<div className="w-full">
+<div className="w-full min-h-screen flex flex-col">
 
-    <div className=" top-0">  
+    <div className="top-0">  
     <Navbar /> 
     </div>
 
-    <div className="w-1/3 mx-auto">
+    <div className="mt-16 px-6 w-md">
         <Hero />
     </div>
 
