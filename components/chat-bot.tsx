@@ -7,11 +7,14 @@ export function ChatBot() {
   const [message, setMessage] = useState("")
   const [files, setFiles] = useState<{ name: string; type: string }[]>([])
   const [messages, setMessages] = useState<{ text: string; isUser: boolean }[]>([
-    { text: "Hi there! I'm your learning assistant. Upload your notes or ask me anything!", isUser: false },
+    {
+      text: "Hi there! I'm your learning assistant. Upload your notes or ask me anything!",
+      isUser: false,
+    },
   ])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  // Auto-resize textarea
+ 
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "40px"
@@ -19,24 +22,33 @@ export function ChatBot() {
     }
   }, [message])
 
-  const handleSendMessage = () => {
+ 
+  const handleSendMessage = async () => {
     if (message.trim()) {
-      setMessages([...messages, { text: message, isUser: true }])
+      const userMessage = { text: message, isUser: true }
+      setMessages((prev) => [...prev, userMessage])
 
-      // Simulate bot response
-      setTimeout(() => {
+      try {
+        const res = await fetch("http://localhost:8000/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        })
+
+        const data = await res.json()
+
         setMessages((prev) => [
           ...prev,
-          {
-            text: "I'm analyzing your question. Based on your notes, here's what I found...",
-            isUser: false,
-          },
+          { text: data.reply || "No response from bot.", isUser: false },
         ])
-      }, 1000)
+      } catch (error) {
+        setMessages((prev) => [
+          ...prev,
+          { text: "Error contacting the AI assistant. Please try again later.", isUser: false },
+        ])
+      }
 
       setMessage("")
-
-      // Reset textarea height
       if (textareaRef.current) {
         textareaRef.current.style.height = "40px"
       }
@@ -44,11 +56,9 @@ export function ChatBot() {
   }
 
   const handleFileUpload = (type: "pdf" | "image") => {
-    // Simulate file upload
     const fileName = type === "pdf" ? "lecture_notes.pdf" : "handwritten_notes.jpg"
     setFiles([...files, { name: fileName, type }])
 
-    // Simulate bot response after file upload
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
