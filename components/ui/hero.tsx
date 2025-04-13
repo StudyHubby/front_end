@@ -14,8 +14,10 @@ export default function Hero() {
 
          <div className="underline-offset-2 text-white"> Reform your studying today with a study soul-mate by your side! </div>
     
-         <div className="text-white bg-black outline-green-500">
-            <Link href='/components/dashboard'> Sign Up! </Link>
+         <div className=" text-white bg-black outline-green-500">
+         <Link href="/dashboard">
+            <button>Sign Up!</button>
+         </Link>
          </div>
 
     </div>
