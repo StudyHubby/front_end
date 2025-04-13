@@ -8,12 +8,13 @@ import { Sidebar } from "@/components/sidebar"
 export default function DashboardPage() {
   return (
     <div className="w-full h-screen ">
-      <Header />
       
       <div className="flex-1 p-6">
+      <Header />
         <div className="flex gap-6 mt-6">
           <Sidebar />
           <div className="flex-1 max-w-7xl">
+           
             <WeeklyStreaks />
 
             <div className="mt-8">
