@@ -1,13 +1,12 @@
 import React from "react";
-import { hero } from "./ui/hero";
-import { footer } from "./ui/footer";
+import Hero from "./ui/hero";
+import Footer from "./ui/footer";
 
 export default function landing(){
  return(
         <div className=""> 
-        
-
-
+            <Footer />
+            <Hero />
         </div>
 
 )

@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "react-day-picker";
 
 
-export function hero() {
+export default function Hero() {
  return(
     <div className="w-full py-4 px-8 space-y-4 text-center"> 
 
