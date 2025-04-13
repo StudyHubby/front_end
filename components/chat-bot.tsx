@@ -11,9 +11,6 @@ export function ChatBot() {
       isUser: false,
     },
   ])
-
-  const pdfInputRef = useRef<HTMLInputElement | null>(null)
-  const imageInputRef = useRef<HTMLInputElement | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
@@ -24,74 +21,83 @@ export function ChatBot() {
   }, [message])
 
   const handleSendMessage = async () => {
-    if (message.trim()) {
-      const userMessage = { text: message, isUser: true }
-      setMessages((prev) => [...prev, userMessage])
+    if (!message.trim()) return
 
-      try {
-        const res = await fetch("http://localhost:8000/process/", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: new URLSearchParams({
-            user_input: message,
-            user_option: "2", // Example option, adjust based on your backend logic
-          }),
-        })
-
-        const data = await res.json()
-
-        setMessages((prev) => [
-          ...prev,
-          { text: data.response || "No response from bot.", isUser: false },
-        ])
-      } catch (error) {
-        setMessages((prev) => [
-          ...prev,
-          { text: "Error contacting the AI assistant. Please try again later.", isUser: false },
-        ])
-      }
-
-      setMessage("")
-      if (textareaRef.current) {
-        textareaRef.current.style.height = "40px"
-      }
-    }
-  }
-
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, type: "pdf" | "image") => {
-    const file = event.target.files?.[0]
-    if (!file) return
-
-    const formData = new FormData()
-    formData.append("file", file)
-    formData.append("name", file.name)
+    const userMessage = { text: message, isUser: true }
+    setMessages((prev) => [...prev, userMessage])
 
     try {
-      const res = await fetch("http://localhost:8000/upload/", {
+      const formData = new FormData()
+      formData.append("user_input", message)
+
+      const res = await fetch("http://localhost:8000/process/", {
         method: "POST",
         body: formData,
       })
 
-      if (res.ok) {
+      const data = await res.json()
+
+      setMessages((prev) => [
+        ...prev,
+        { text: data.response || "No response from bot.", isUser: false },
+      ])
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        { text: "Error contacting the AI assistant. Please try again later.", isUser: false },
+      ])
+    }
+
+    setMessage("")
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "40px"
+    }
+  }
+
+  const handleFileUpload = async (type: "pdf" | "image") => {
+    const input = document.createElement("input")
+    input.type = "file"
+    input.accept = type === "pdf" ? "application/pdf" : "image/*"
+
+    input.onchange = async () => {
+      const file = input.files?.[0]
+      if (!file) return
+
+      const formData = new FormData()
+      formData.append("file", file)
+      formData.append("name", file.name)
+
+      try {
+        const res = await fetch("http://localhost:8000/upload/", {
+          method: "POST",
+          body: formData,
+        })
+
+        const data = await res.json()
+
+        if (data.success) {
+          setMessages((prev) => [
+            ...prev,
+            {
+              text: `I’ve successfully processed your ${type === "pdf" ? "PDF" : "image"} file "${file.name}". What would you like to ask about it?`,
+              isUser: false,
+            },
+          ])
+        } else {
+          throw new Error(data.error || "Upload failed")
+        }
+      } catch (error) {
         setMessages((prev) => [
           ...prev,
           {
-            text: `✅ Uploaded your ${type === "pdf" ? "PDF" : "image"} successfully. You can now ask questions!`,
+            text: `There was a problem uploading your ${type} file. Please try again.`,
             isUser: false,
           },
         ])
-      } else {
-        throw new Error("Upload failed")
       }
-    } catch (err) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          text: "❌ There was an error uploading your file. Please try again.",
-          isUser: false,
-        },
-      ])
     }
+
+    input.click()
   }
 
   return (
@@ -127,37 +133,20 @@ export function ChatBot() {
       <div className="p-6 border-t border-slate-700 bg-slate-800">
         <div className="flex gap-4 mb-6 justify-center">
           <button
-            onClick={() => pdfInputRef.current?.click()}
+            onClick={() => handleFileUpload("pdf")}
             className="flex items-center gap-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 rounded-full px-6 py-3 text-white shadow-md transition-all duration-200"
           >
             <FileText className="h-5 w-5 text-indigo-300" />
             <span className="font-medium">Upload PDF</span>
           </button>
           <button
-            onClick={() => imageInputRef.current?.click()}
+            onClick={() => handleFileUpload("image")}
             className="flex items-center gap-2 bg-gradient-to-r from-slate-700 to-slate-600 hover:from-slate-600 hover:to-slate-500 rounded-full px-6 py-3 text-white shadow-md transition-all duration-200"
           >
             <ImageIcon className="h-5 w-5 text-indigo-300" />
             <span className="font-medium">Upload Image</span>
           </button>
-
-          {/* Hidden file inputs */}
-          <input
-            ref={pdfInputRef}
-            type="file"
-            accept="application/pdf"
-            onChange={(e) => handleFileUpload(e, "pdf")}
-            className="hidden"
-          />
-          <input
-            ref={imageInputRef}
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleFileUpload(e, "image")}
-            className="hidden"
-          />
         </div>
-
         <div className="flex gap-2 items-center">
           <input
             type="text"
@@ -183,4 +172,3 @@ export function ChatBot() {
     </div>
   )
 }
-
